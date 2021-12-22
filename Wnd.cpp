@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include "Wnd.h"
 
 Wnd::Wnd(Wnd* parent)
@@ -12,10 +13,11 @@ Wnd::Wnd(Wnd* parent, int x, int y, int w, int h, const TCHAR* text)
 
 }
 
-LRESULT Wnd::WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+Wnd::~Wnd()
 {
-	return DefWindowProc(hwnd, msg, wp, lp);
 }
+
+
 
 bool Wnd::Create()
 {
@@ -25,7 +27,7 @@ bool Wnd::Create()
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hInstance = GetModuleHandle(NULL);
 	wc.lpszClassName = lpClass.c_str();
-	wc.lpfnWndProc = Wnd::WndProc;
+	wc.lpfnWndProc = Wnd::GlobalWndProc;
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 	if (!GetClassInfoEx(wc.hInstance, wc.lpszClassName, &wc)) {
 		if (!RegisterClassEx(&wc)) {
@@ -56,12 +58,74 @@ bool Wnd::Create()
 	if (!m_hwnd) {
 		return false;
 	}
-		
-
 	return true;
 }
 
 void Wnd::Show()
 {
 	ShowWindow(m_hwnd, TRUE);
+}
+
+const char* Wnd::GetText() const
+{
+	return lpText.c_str();
+}
+
+LRESULT Wnd::LocalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	Wnd* child = nullptr;
+	switch (msg)
+	{
+	case WM_SIZE:
+		LOG("%s sizing", GetText());
+		break;
+
+	case WM_RBUTTONUP:
+		LOG("%s button", GetText());
+		break;
+
+	case WM_COMMAND:
+	{
+		LOG("%s command", GetText());
+		Wnd* child = nullptr;
+		child = (Wnd*)GetWindowLongPtr((HWND)lp, GWL_USERDATA);
+		if (child) {
+			LOG("%s child command", child->GetText());
+		}
+		break;
+	}
+	case WM_NOTIFY:
+	{
+		LOG("%s notify", GetText());
+		child = (Wnd*)GetWindowLongPtr((HWND)lp, GWL_USERDATA);
+		if (child) {
+			LOG("%s child notify", child->GetText());
+		}
+		break;
+	}
+	}
+	if (is_control) {
+		return DefSubclassProc(hwnd, msg, wp, lp);
+	}
+	return DefWindowProc(hwnd, msg, wp, lp);
+}
+
+LRESULT Wnd::GlobalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	Wnd* wnd = (Wnd*)GetWindowLongPtr(hwnd, GWL_USERDATA);
+
+	switch (msg)
+	{
+	case WM_NCCREATE: {
+		LPCREATESTRUCT clp = (LPCREATESTRUCT)lp;
+		wnd = (Wnd*)clp->lpCreateParams;
+		SetWindowLongPtr(hwnd, GWL_USERDATA, (LONG)wnd);
+		return true;
+		break;
+	}
+	}
+	if (wnd)
+		return wnd->LocalWndProc(hwnd, msg, wp, lp);
+
+	return DefWindowProc(hwnd, msg, wp, lp);
 }
