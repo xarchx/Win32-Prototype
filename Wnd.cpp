@@ -71,9 +71,14 @@ const char* Wnd::GetText() const
 	return lpText.c_str();
 }
 
+LRESULT Wnd::DrawItemEvent(DRAWITEMSTRUCT* dis)
+{
+	return FALSE;
+}
+
 LRESULT Wnd::LocalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	Wnd* child = nullptr;
+
 	switch (msg)
 	{
 	case WM_SIZE:
@@ -96,11 +101,28 @@ LRESULT Wnd::LocalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 	case WM_NOTIFY:
 	{
-		LOG("%s notify", GetText());
-		child = (Wnd*)GetWindowLongPtr((HWND)lp, GWL_USERDATA);
+		//LOG("%s notify", GetText());
+		HWND child_hwnd = ((LPNMHDR)lp)->hwndFrom;
+		Wnd* child = (Wnd*)GetWindowLongPtr(child_hwnd, GWL_USERDATA);
 		if (child) {
 			LOG("%s child notify", child->GetText());
 		}
+		break;
+	}
+	case WM_PRINTCLIENT:
+	{
+		LOG("%s is printclient", GetText());
+		break;
+	}
+	case WM_DRAWITEM:
+	{
+		LPDRAWITEMSTRUCT dis = (LPDRAWITEMSTRUCT)lp;
+		Wnd* child = (Wnd*)GetWindowLongPtr(dis->hwndItem, GWL_USERDATA);
+		if (child) {
+			if (child->DrawItemEvent(dis))
+				return TRUE;
+		}
+		
 		break;
 	}
 	}

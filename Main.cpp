@@ -1,25 +1,12 @@
 #include <PCH.h>
 #include <Wnd.h>
 #include <Control.h>
-struct App
-{
-	App() {
-		InitCommonControls();
-	}
-	int exe() {
-		MSG msg{};
-		while (GetMessage(&msg, NULL, NULL, 0)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		return msg.lParam;
-	}
-};
+#include <Application.h>
 
 
 int main(int args, char* argv[])
 {
-	App app;
+	Application app;
 
 	Wnd window(nullptr, 700, 200, 700, 400,"main window");
 	window.Create();
@@ -30,7 +17,13 @@ int main(int args, char* argv[])
 	button.style = WS_VISIBLE | BS_PUSHBUTTON;
 	button.Create();
 
-	Log::log_format("%d ssss", 1000);
+	Control status(&window, 100, -200, 100, 10, "status");
+	status.lpClass = STATUSCLASSNAME;
+	status.style = WS_VISIBLE | WS_BORDER;
+	status.Create();
 
-	return app.exe();
+	Log::log_format("%d ssss", 1000);
+	
+
+	return app.Exec();
 }

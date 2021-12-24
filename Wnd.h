@@ -11,6 +11,7 @@ public:
 	virtual bool Create();
 	void Show();
 	const char* GetText() const;
+	virtual LRESULT DrawItemEvent(DRAWITEMSTRUCT* dis);
 	virtual LRESULT LocalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT WINAPI GlobalWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
