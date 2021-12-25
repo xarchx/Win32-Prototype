@@ -23,7 +23,7 @@ int main(int args, char* argv[])
 	status.Create();
 
 	Log::log_format("%d ssss", 1000);
-	
+	LOG("plus");
 
 	return app.Exec();
 }

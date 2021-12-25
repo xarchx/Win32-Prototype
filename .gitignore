@@ -1,0 +1,15 @@
+
+Win32-Prototype.vcxproj
+Bin/Win32-Prototype.pdb
+Bin/Win32-Prototype.lib
+*.obj
+*.vcxproj
+*.db
+*.opendb
+*.ipch
+*.tlog
+*.pdb
+*.pch
+*.log
+*.idb
+.vs/Win32-Prototype/v15/.suo
